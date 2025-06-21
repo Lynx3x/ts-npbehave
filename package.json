@@ -1,0 +1,40 @@
+{
+  "name": "ts-npbehave",
+  "version": "1.0.0",
+  "description": "NPBehave behavior tree library ported to TypeScript with GUI editor",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack serve --mode development",
+    "editor": "webpack serve --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "behavior-tree",
+    "ai",
+    "typescript",
+    "game-development",
+    "editor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^17.0.50",
+    "@types/react-dom": "^17.0.17",
+    "css-loader": "^6.7.3",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-flow-renderer": "^10.3.17",
+    "styled-components": "^5.3.6"
+  }
+}

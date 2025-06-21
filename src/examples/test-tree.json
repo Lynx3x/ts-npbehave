@@ -1,0 +1,53 @@
+{
+    "trees": [
+        {
+            "type": "COMPOSITE.SEQUENCE",
+            "properties": {
+                "label": "Sequence"
+            },
+            "children": [
+                {
+                    "type": "TASK.ACTION",
+                    "properties": {
+                        "label": "Action",
+                        "actionDescription": "测试动作"
+                    }
+                },
+                {
+                    "type": "TASK.WAIT",
+                    "properties": {
+                        "label": "Wait",
+                        "waitTime": 2.0,
+                        "randomVariation": 0.5
+                    }
+                },
+                {
+                    "type": "DECORATOR.BLACKBOARD_CONDITION",
+                    "properties": {
+                        "label": "BlackboardCondition",
+                        "key": "testKey",
+                        "operator": "IS_EQUAL",
+                        "value": true
+                    },
+                    "children": [
+                        {
+                            "type": "COMPOSITE.SELECTOR",
+                            "properties": {
+                                "label": "Selector"
+                            },
+                            "children": [
+                                {
+                                    "type": "TASK.ACTION",
+                                    "properties": {
+                                        "label": "Action",
+                                        "actionDescription": "条件成功动作"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
