@@ -1,89 +1,81 @@
 # TS-NPBehave
 
-TS-NPBehave是一个TypeScript实现的行为树库，基于Unity的[NPBehave](https://github.com/meniku/NPBehave)项目移植而来，并添加了对异步操作的支持和图形化编辑器。
+TypeScript版本的NPBehave行为树库，支持异步操作和Node.js环境。
 
-## 特点
+## 特性
 
-- 完全使用TypeScript编写，提供类型安全
-- 支持异步操作（使用Promise和async/await）
-- 内置图形化编辑器，可视化创建和编辑行为树
-- 支持导入/导出JSON配置
-- 丰富的节点类型：
-  - 复合节点：Selector、Sequence、Parallel
-  - 装饰器节点：BlackboardCondition、Repeater、Inverter、Succeeder、Failer、TimeLimit
-  - 任务节点：Action、Wait、WaitForCondition
+- 基于Promise和async/await的异步操作支持
+- 兼容Node.js和浏览器环境
+- 完整的行为树节点类型实现
+- 可视化编辑器支持
+- 从配置文件加载行为树
+
+## 节点类型
+
+### 复合节点
+
+- `Selector` - 依次执行子节点，直到一个子节点成功
+- `Sequence` - 依次执行子节点，直到所有子节点成功或一个失败
+- `Parallel` - 并行执行所有子节点
+- `RandomSelector` - 随机顺序执行子节点，直到一个成功
+- `RandomSequence` - 随机顺序执行所有子节点
+
+### 装饰器节点
+
+- `BlackboardCondition` - 基于黑板值的条件装饰器
+- `Condition` - 基于自定义函数的条件装饰器
+- `Cooldown` - 冷却时间装饰器
+- `Failer` - 始终返回失败的装饰器
+- `Inverter` - 反转结果的装饰器
+- `Observer` - 观察条件变化的装饰器
+- `Repeater` - 重复执行子节点的装饰器
+- `Succeeder` - 始终返回成功的装饰器
+- `TimeLimit` - 时间限制装饰器
+
+### 任务节点
+
+- `Action` - 执行自定义函数的动作节点
+- `Wait` - 等待指定时间的节点
+- `WaitForCondition` - 等待条件满足的节点
+- `WaitUntil` - 等待直到条件满足的节点
+- `WaitUntilStopped` - 等待直到被停止的节点
+- `IsBlackboardValueSet` - 检查黑板值是否已设置的条件节点
 
 ## 安装
 
 ```bash
-npm install ts-npbehave
+# 克隆仓库
+git clone https://github.com/yourusername/ts-npbehave.git
+cd ts-npbehave
+
+# 安装依赖
+npm install
 ```
 
-## 快速开始
+## 运行示例
 
-### 创建简单的行为树
+TS-NPBehave包含多个示例，展示各种节点的使用方法。
 
-```typescript
-import {
-    Selector,
-    Sequence,
-    Action,
-    BlackboardCondition,
-    Operator,
-    Wait
-} from 'ts-npbehave';
+### 使用npm脚本运行示例
 
-// 创建行为树
-const tree = new Selector([
-    new Sequence([
-        new BlackboardCondition('energy', Operator.IS_GREATER_OR_EQUAL, 50, 
-            new Action(async () => {
-                console.log('执行高能量动作');
-                return true;
-            })
-        )
-    ]),
-    new Sequence([
-        new Action(async () => {
-            console.log('执行低能量动作');
-            return true;
-        }),
-        new Wait(2.0)
-    ])
-]);
-
-// 启动行为树
-await tree.start();
+```bash
+npm run example ObserverTest
 ```
 
-### 使用图形化编辑器
+### 可用的示例
 
-```typescript
-import { BehaviorTreeEditor } from 'ts-npbehave/editor';
-import React from 'react';
+- `ObserverTest` - 展示Observer装饰器和WaitUntilStopped节点的使用
+- `CooldownTest` - 展示Cooldown装饰器和RandomSelector节点的使用
+- `ConditionTest` - 展示条件节点的使用
+- `LoadFromConfig` - 展示从配置文件加载行为树的使用
 
-const App = () => {
-    return (
-        <div style={{ width: '100%', height: '100vh' }}>
-            <BehaviorTreeEditor />
-        </div>
-    );
-};
+## 使用可视化编辑器
 
-export default App;
+```bash
+npm run editor
 ```
 
-## 文档
-
-详细的API文档请参阅[API.md](./API.md)。
-
-## 开发计划
-
-查看[DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)了解项目的开发计划和进度。
-
-## 更新日志
-
-查看[CHANGELOG.md](./CHANGELOG.md)了解项目的更新历史。
+然后在浏览器中访问 http://localhost:8080
 
 ## 许可证
 

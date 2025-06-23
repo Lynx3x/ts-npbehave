@@ -1,4 +1,4 @@
-import { Composite, Node, NodeResult } from '../core';
+import { Composite, Node, NodeResult, Blackboard } from '../core';
 
 /**
  * 测试父节点
@@ -7,6 +7,7 @@ import { Composite, Node, NodeResult } from '../core';
 export class TestParent extends Composite {
     private resultPromise: Promise<NodeResult>;
     private resolveResult!: (result: NodeResult) => void;
+    private _blackboard?: Blackboard;
 
     /**
      * 构造函数
@@ -19,16 +20,36 @@ export class TestParent extends Composite {
     }
 
     /**
+     * 设置黑板
+     * @param blackboard 要使用的黑板
+     */
+    setBlackboard(blackboard: Blackboard): void {
+        this._blackboard = blackboard;
+    }
+
+    /**
+     * 获取黑板
+     */
+    get blackboard(): Blackboard | undefined {
+        return this._blackboard;
+    }
+
+    /**
      * 启动子节点并获取最终结果
      * @param child 要测试的子节点
      * @returns 节点的最终结果
      */
     async runAndGetResult(child: Node): Promise<NodeResult> {
+        // 重置Promise
+        this.resultPromise = new Promise((resolve) => {
+            this.resolveResult = resolve;
+        });
+
         // 添加子节点
         this.children = [child];
 
         // 设置节点关系
-        child.setRoot(this.rootNode!);
+        child.setRoot(this);
         child.setParent(this);
 
         // 启动子节点

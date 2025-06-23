@@ -43,6 +43,13 @@ export class Root extends Container {
     }
 
     /**
+     * 获取主节点
+     */
+    getMainNode(): Node {
+        return this.mainNode;
+    }
+
+    /**
      * 启动行为树
      */
     protected override async doStart(): Promise<NodeResult> {

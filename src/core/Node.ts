@@ -239,6 +239,8 @@ export interface Root {
 export interface Container extends Node {
     childStopped(child: Node, result: NodeResult): Promise<void>;
     getPath(): string;
+    stopLowerPriorityChildren(referenceNode: Node): Promise<void>;
+    immediateRestart(node: Node): Promise<void>;
 }
 
 /**
@@ -256,6 +258,10 @@ export interface Blackboard {
     addObserver(key: string, observer: () => void | Promise<void>): void;
     removeObserver(key: string, observer: () => void | Promise<void>): void;
     compare<T>(key: string, op: any, value: T): Promise<boolean>;
+    get<T>(key: string): Promise<T | undefined>;
+    set<T>(key: string, value: T): Promise<void>;
+    has(key: string): Promise<boolean>;
+    remove(key: string): Promise<void>;
 }
 
 /**
@@ -265,4 +271,5 @@ export interface Clock {
     // 时钟接口声明
     addTimer(delay: number, repeat: boolean, callback: () => void): string;
     removeTimer(id: string): void;
+    getElapsedTime(): number;
 } 

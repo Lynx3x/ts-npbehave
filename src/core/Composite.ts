@@ -96,4 +96,56 @@ export abstract class Composite extends Container {
      * @param result 子节点执行结果
      */
     abstract override childStopped(child: Node, result: NodeResult): Promise<void>;
+
+    /**
+     * 停止优先级低于指定节点的所有子节点
+     * 实现LOWER_PRIORITY停止模式
+     * @param referenceNode 参考节点
+     */
+    override async stopLowerPriorityChildren(referenceNode: Node): Promise<void> {
+        let foundReference = false;
+        const stopPromises: Promise<void>[] = [];
+
+        // 遍历所有子节点
+        for (const child of this.children) {
+            // 一旦找到参考节点，标记已找到
+            if (child === referenceNode) {
+                foundReference = true;
+                continue;
+            }
+
+            // 如果已找到参考节点，则后续节点优先级低于参考节点
+            // 如果节点仍在活动状态，则停止它
+            if (foundReference && (child.isActive || child.isStopRequested)) {
+                stopPromises.push(child.stop());
+            }
+        }
+
+        // 等待所有停止操作完成
+        await Promise.all(stopPromises);
+    }
+
+    /**
+     * 立即重启指定节点
+     * 实现IMMEDIATE_RESTART停止模式
+     * @param node 要重启的节点
+     */
+    override async immediateRestart(node: Node): Promise<void> {
+        // 找到节点在子节点列表中的索引
+        const index = this.children.indexOf(node);
+
+        // 如果找到节点
+        if (index >= 0) {
+            // 如果节点仍在活动状态，先停止它
+            if (node.isActive || node.isStopRequested) {
+                await node.stop();
+            }
+
+            // 设置当前子节点索引
+            this.currentChildIndex = index;
+
+            // 重启节点
+            await node.start();
+        }
+    }
 } 

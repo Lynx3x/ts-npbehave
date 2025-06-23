@@ -1,9 +1,11 @@
 import { BehaviorTreeBuilder } from '../core/BehaviorTreeBuilder';
+import { NodeResult } from '../core/Node';
+import { TestParent } from './TestParent';
 
 /**
  * 从配置文件加载行为树示例
  */
-export function loadFromConfigExample() {
+export async function loadFromConfigExample() {
     // 示例JSON配置
     const exampleConfig = `{
         "trees": [
@@ -85,24 +87,28 @@ export function loadFromConfigExample() {
     if (behaviorTree) {
         console.log("行为树加载成功!");
 
-        // 设置黑板值
-        behaviorTree.blackboard.set("isHungry", false);
+        // 创建测试父节点，用于运行行为树
+        const testParent = new TestParent();
 
-        // 启动行为树
-        console.log("启动行为树...");
-        behaviorTree.start();
+        // 为TestParent设置与行为树相同的黑板
+        testParent.setBlackboard(behaviorTree.blackboard);
 
-        // 5秒后改变黑板值
-        setTimeout(() => {
-            console.log("\n改变黑板值: isHungry = true");
-            behaviorTree.blackboard.set("isHungry", true);
-        }, 5000);
+        // 设置黑板值 - 初始设为false，表示不饥饿
+        await behaviorTree.blackboard.set("isHungry", false);
 
-        // 10秒后停止行为树
-        setTimeout(() => {
-            console.log("\n停止行为树...");
-            behaviorTree.stop();
-        }, 10000);
+        console.log("\n第一次运行 (isHungry = false):");
+        console.log("应该执行巡逻序列");
+        let result = await testParent.runAndGetResult(behaviorTree.getMainNode());
+        console.log(`行为树执行结果: ${NodeResult[result]}`);
+
+        // 第二次运行，改变黑板值
+        console.log("\n第二次运行 (isHungry = true):");
+        console.log("应该执行进食序列");
+        await behaviorTree.blackboard.set("isHungry", true);
+        result = await testParent.runAndGetResult(behaviorTree.getMainNode());
+        console.log(`行为树执行结果: ${NodeResult[result]}`);
+
+        console.log("\n示例完成!");
     } else {
         console.error("行为树加载失败!");
     }
@@ -110,5 +116,7 @@ export function loadFromConfigExample() {
 
 // 如果直接运行此文件则执行示例
 if (require.main === module) {
-    loadFromConfigExample();
+    loadFromConfigExample().catch(err => {
+        console.error("示例运行出错:", err);
+    });
 } 
