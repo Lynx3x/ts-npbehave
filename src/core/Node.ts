@@ -253,9 +253,9 @@ export interface Composite extends Container {
  */
 export interface Blackboard {
     // 黑板接口声明
-    addObserver(key: string, observer: () => void): void;
-    removeObserver(key: string, observer: () => void): void;
-    compare<T>(key: string, op: any, value: T): boolean;
+    addObserver(key: string, observer: () => void | Promise<void>): void;
+    removeObserver(key: string, observer: () => void | Promise<void>): void;
+    compare<T>(key: string, op: any, value: T): Promise<boolean>;
 }
 
 /**

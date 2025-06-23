@@ -1,5 +1,5 @@
 import { Container } from './Container';
-import { Node, State } from './Node';
+import { Node, State, NodeResult } from './Node';
 import { Clock } from './Clock';
 import { Blackboard } from './Blackboard';
 
@@ -45,16 +45,17 @@ export class Root extends Container {
     /**
      * 启动行为树
      */
-    protected override doStart(): void {
+    protected override async doStart(): Promise<NodeResult> {
         this._clock.start();
-        this.mainNode.start();
+        await this.mainNode.start();
+        return NodeResult.SUCCESS;
     }
 
     /**
      * 停止行为树
      */
-    protected override doStop(): void {
-        this.mainNode.stop();
+    protected override async doStop(): Promise<void> {
+        await this.mainNode.stop();
     }
 
     /**
@@ -62,10 +63,10 @@ export class Root extends Container {
      * @param child 停止的子节点
      * @param result 执行结果
      */
-    childStopped(child: Node, result: boolean): void {
+    async childStopped(child: Node, result: NodeResult): Promise<void> {
         // 根节点会不断重启主节点，无论成功与否
         if (this._currentState === State.ACTIVE) {
-            this.mainNode.start();
+            await this.mainNode.start();
         } else {
             this.stopped(result);
         }

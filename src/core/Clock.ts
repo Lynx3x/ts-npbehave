@@ -2,7 +2,7 @@
  * 时钟类，用于行为树的计时功能
  */
 export class Clock {
-    private updateRoutine: number | null = null;
+    private updateRoutine: NodeJS.Timeout | null = null;
     private elapsedTime: number = 0;
     private started: boolean = false;
 
@@ -12,13 +12,35 @@ export class Clock {
     private updateObservers: Set<() => void> = new Set();
 
     /**
+     * 获取当前环境的setInterval函数
+     */
+    private getSetInterval(): (callback: () => void, ms: number) => any {
+        if (typeof window !== 'undefined') {
+            return window.setInterval;
+        } else {
+            return global.setInterval;
+        }
+    }
+
+    /**
+     * 获取当前环境的clearInterval函数
+     */
+    private getClearInterval(): (id: any) => void {
+        if (typeof window !== 'undefined') {
+            return window.clearInterval;
+        } else {
+            return global.clearInterval;
+        }
+    }
+
+    /**
      * 启动时钟
      */
     start(): void {
         if (!this.started) {
             this.started = true;
             this.elapsedTime = 0;
-            this.updateRoutine = window.setInterval(() => this.update(), 16); // 约60fps
+            this.updateRoutine = this.getSetInterval()(() => this.update(), 16); // 约60fps
         }
     }
 
@@ -29,7 +51,7 @@ export class Clock {
         if (this.started) {
             this.started = false;
             if (this.updateRoutine !== null) {
-                window.clearInterval(this.updateRoutine);
+                this.getClearInterval()(this.updateRoutine);
                 this.updateRoutine = null;
             }
         }
@@ -40,7 +62,7 @@ export class Clock {
      */
     pause(): void {
         if (this.started && this.updateRoutine !== null) {
-            window.clearInterval(this.updateRoutine);
+            this.getClearInterval()(this.updateRoutine);
             this.updateRoutine = null;
         }
     }
@@ -50,7 +72,7 @@ export class Clock {
      */
     resume(): void {
         if (this.started && this.updateRoutine === null) {
-            this.updateRoutine = window.setInterval(() => this.update(), 16);
+            this.updateRoutine = this.getSetInterval()(() => this.update(), 16);
         }
     }
 

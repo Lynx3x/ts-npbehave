@@ -1,5 +1,5 @@
 import { Composite } from '../Composite';
-import { Node } from '../Node';
+import { Node, NodeResult } from '../Node';
 
 /**
  * 策略枚举，定义并行节点的成功/失败条件
@@ -57,63 +57,80 @@ export class Parallel extends Composite {
     /**
      * 开始执行并行节点
      */
-    protected override doStart(): void {
+    protected override async doStart(): Promise<NodeResult> {
         // 重置计数器
         this.childrenCount = 0;
         this.childrenSuccessCount = 0;
 
         // 如果没有子节点，直接成功
         if (this.children.length === 0) {
-            this.stopped(true);
-            return;
+            return NodeResult.SUCCESS;
         }
 
         // 启动所有子节点
         for (const child of this.children) {
-            child.start();
+            await child.start();
         }
+
+        // 返回RUNNING，因为子节点的结果会通过childStopped回调处理
+        return NodeResult.RUNNING;
     }
 
     /**
      * 处理子节点停止事件
      * @param child 停止的子节点
-     * @param success 执行结果
+     * @param result 执行结果
      */
-    override childStopped(child: Node, success: boolean): void {
+    override async childStopped(child: Node, result: NodeResult): Promise<void> {
         // 更新计数器
         this.childrenCount++;
-        if (success) {
+        if (result === NodeResult.SUCCESS) {
             this.childrenSuccessCount++;
         }
 
         // 检查是否满足成功或失败条件
         if (
             // 失败策略为ONE且有一个子节点失败
-            (this.failurePolicy === Policy.ONE && !success) ||
+            (this.failurePolicy === Policy.ONE && result === NodeResult.FAILURE) ||
             // 成功策略为ONE且有一个子节点成功
-            (this.successPolicy === Policy.ONE && success)
+            (this.successPolicy === Policy.ONE && result === NodeResult.SUCCESS)
         ) {
             // 停止所有其他正在运行的子节点
-            this.stopChildren();
+            await this.stopChildren();
             // 返回结果
-            this.stopped(success);
+            this.stopped(result);
             return;
         }
 
         // 检查是否所有子节点都已完成
         if (this.childrenCount === this.children.length) {
             // 所有子节点都已完成，根据策略确定结果
-            let result: boolean;
+            let finalResult: NodeResult;
 
             if (this.failurePolicy === Policy.ALL) {
                 // 失败策略为ALL：只有当所有子节点都失败时才失败
-                result = this.childrenSuccessCount > 0;
+                finalResult = this.childrenSuccessCount > 0
+                    ? NodeResult.SUCCESS
+                    : NodeResult.FAILURE;
             } else {
                 // 成功策略为ALL：只有当所有子节点都成功时才成功
-                result = this.childrenSuccessCount === this.children.length;
+                finalResult = this.childrenSuccessCount === this.children.length
+                    ? NodeResult.SUCCESS
+                    : NodeResult.FAILURE;
             }
 
-            this.stopped(result);
+            this.stopped(finalResult);
+        }
+    }
+
+    /**
+     * 停止所有子节点
+     */
+    protected async stopChildren(): Promise<void> {
+        for (const child of this.children) {
+            if (child.isActive) {
+                await child.stop();
+            }
         }
     }
 } 

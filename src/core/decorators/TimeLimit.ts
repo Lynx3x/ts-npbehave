@@ -25,12 +25,13 @@ export class TimeLimit extends Decorator {
      */
     protected override async doStart(): Promise<NodeResult> {
         // 设置超时计时器
-        this.timerId = setTimeout(() => {
+        this.timerId = setTimeout(async () => {
             if (this.isActive) {
                 // 如果子节点还在运行，则停止它并返回失败
-                this.decoratee.stop().then(() => {
-                    this.stopped(NodeResult.FAILURE);
-                });
+                await this.decoratee.stop();
+                if (this.isActive) { // 再次检查，以防在停止过程中状态已改变
+                    await this.stopped(NodeResult.FAILURE);
+                }
             }
         }, this.limitSeconds * 1000);
 

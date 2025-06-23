@@ -200,7 +200,7 @@ export class BehaviorTreeBuilder {
                 operator = Operator.ALWAYS_TRUE;
         }
 
-        return new BlackboardCondition(key, operator, value, undefined, childNode);
+        return new BlackboardCondition(key, operator, value, childNode);
     }
 
     /**
