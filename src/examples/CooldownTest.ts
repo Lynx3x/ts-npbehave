@@ -1,6 +1,6 @@
 import { TestParent } from './TestParent';
 import { Cooldown } from '../core/decorators/Cooldown';
-import { Action } from '../core/tasks/actions/Action';
+import { Action } from '../core/tasks/Action';
 import { RandomSelector } from '../core/composites/RandomSelector';
 import { NodeResult } from '../core/Node';
 import { Blackboard } from '../core/Blackboard';
@@ -10,7 +10,7 @@ import { Root } from '../core/Root';
 /**
  * 测试Cooldown和RandomSelector节点
  */
-async function main() {
+export async function main() {
     // 创建黑板和时钟
     const blackboard = new Blackboard();
     const clock = new Clock();
@@ -21,15 +21,15 @@ async function main() {
     const randomSelector = new RandomSelector(
         new Action(() => {
             console.log('执行动作1: 失败');
-            return NodeResult.FAILURE;
+            return false;
         }),
         new Action(() => {
             console.log('执行动作2: 成功');
-            return NodeResult.SUCCESS;
+            return true;
         }),
         new Action(() => {
             console.log('执行动作3: 失败');
-            return NodeResult.FAILURE;
+            return false;
         })
     );
 
@@ -44,12 +44,7 @@ async function main() {
     testParent.setBlackboard(blackboard);
 
     // 创建Root节点来管理时钟
-    const root = new Root();
-    root.blackboard = blackboard;
-    root.clock = clock;
-
-    // 给cooldownNode设置根节点，使其能访问时钟
-    cooldownNode.setRoot(root);
+    const root = new Root(cooldownNode, blackboard, clock);
 
     // 启动时钟
     clock.start();
@@ -77,6 +72,6 @@ async function main() {
 }
 
 // 如果是直接运行此文件，则执行main函数
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
     main().catch(console.error);
 } 

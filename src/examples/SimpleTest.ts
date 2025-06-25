@@ -1,34 +1,54 @@
 import { Action, Wait, NodeResult } from '../core';
 
 /**
+ * 日志输出到DOM元素
+ * @param text 日志文本
+ */
+function logToDOM(text: string) {
+    if (typeof document !== 'undefined') {
+        const logArea = document.getElementById('log-area');
+        if (logArea) {
+            const logLine = document.createElement('div');
+            logLine.textContent = text;
+            logArea.appendChild(logLine);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+    }
+    console.log(text);
+}
+
+/**
  * 简单测试
  */
-async function runSimpleTest() {
-    console.log('开始简单测试TS-NPBehave节点...');
+export async function runTest() {
+    const startMessage = '开始简单测试TS-NPBehave节点...';
+    logToDOM(startMessage);
 
     // 测试Action节点
-    console.log('\n--- 测试Action节点 ---');
+    logToDOM('\n--- 测试Action节点 ---');
     const actionNode = new Action(async () => {
-        console.log('执行Action节点');
+        logToDOM('执行Action节点');
         return true;
     });
     const actionResult = await actionNode.start();
-    console.log(`Action节点结果: ${NodeResult[actionResult]}`);
+    logToDOM(`Action节点结果: ${NodeResult[actionResult]}`);
 
     // 测试Wait节点
-    console.log('\n--- 测试Wait节点 ---');
-    console.log('等待1秒...');
+    logToDOM('\n--- 测试Wait节点 ---');
+    logToDOM('等待1秒...');
     const waitNode = new Wait(1.0);
     const waitResult = await waitNode.start();
-    console.log(`Wait节点结果: ${NodeResult[waitResult]}`);
+    logToDOM(`Wait节点结果: ${NodeResult[waitResult]}`);
 
-    console.log('\n测试完成!');
+    logToDOM('\n测试完成!');
 }
 
-// 立即执行测试
-runSimpleTest().catch(error => {
-    console.error('测试过程中发生错误:', error);
-});
-
-// 添加空导出，使文件成为模块
-export { }; 
+// 仅在直接执行此文件时运行测试
+if (typeof window !== 'undefined' && window.document) {
+    // 浏览器环境，不自动执行
+} else {
+    // Node.js环境，自动执行
+    runTest().catch(error => {
+        console.error('测试过程中发生错误:', error);
+    });
+} 
